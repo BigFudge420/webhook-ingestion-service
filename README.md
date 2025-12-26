@@ -59,31 +59,85 @@ WEBHOOK_SECRET=your_shared_hmac_secret
 ```
 ---
 
-## Running Locally
+## Build & Run Instructions
 
-1. Install dependencies
+### Prerequisites
+
+- Node.js **18+**
+- PostgreSQL **14+**
+- npm
+- A PostgreSQL database available locally or remotely
+
+---
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/BigFudge420/webhook-ingestion-service.git
+cd webhook-ingestion-service
+```
+
+### 2. Installing dependecies
 
 ```
 npm install
 ```
 
-2. Configure environment variables
+### 3. Configure environment variables
+
+Create a .env file in the project root:
 
 ```
-export DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-export WEBHOOK_SECRET=your_shared_hmac_secret
+DATABASE_URL=postgresql://user:password@localhost:5432/webhooks
+WEBHOOK_SECRET=your_shared_hmac_secret
+PORT=3000
 ```
 
-3. Run database migrations
+DATABASE_URL – PostgreSQL connection string
+
+WEBHOOK_SECRET – shared secret used to verify webhook HMAC signatures
+
+PORT – optional (defaults to 3000)
+
+### 4. Generate Prisma client
+
+```
+npx prisma generate
+```
+
+### 5. Run database migrations
 
 ```
 npx prisma migrate dev
 ```
 
-4. Start the server
+This creates the required tables and indexes.
+
+### 6. Run in development mode
 
 ```
 npm run dev
 ```
 
-The service will start on the configured port (default: 3000).
+Uses ts-node-dev
+
+Auto-restarts on file changes
+
+Intended for local development only
+
+
+### 7. Build for production
+
+```
+npm run build
+```
+
+This compiles TypeScript into the dist/ directory.
+
+### 8. Run the production build
+
+```
+npm start
+```
+
+This runs the compiled JavaScript from dist/server.js.
