@@ -36,8 +36,15 @@ const createEvent = async (req : Request, res : Response) => {
         return res.status(201).json({message : 'Event stored'})
     }
     catch (err : any) {
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002')  {
-            return res.status(202).json({message : 'Duplicate Event'})
+        if (err instanceof Prisma.PrismaClientKnownRequestError)  {
+            if (err.code === 'P2002') {
+                return res.status(202).json({message : 'Duplicate Event'})
+            }
+
+            console.error('Prisma error:', err.code, err.message)
+        }
+        else {
+            console.error('Unexpected error:', err)
         }
 
         return res.status(500).json({message : 'Internal Server Error'})
@@ -46,6 +53,7 @@ const createEvent = async (req : Request, res : Response) => {
 
 const getEvent = async (req : Request, res : Response, next : NextFunction) => {
     try {
+        // Supporting one order_id per GET request for now, can change it if needed in the future
         const parsed = orderIdSchema.safeParse(req.query.order_id)
 
         if (!parsed.success) {
