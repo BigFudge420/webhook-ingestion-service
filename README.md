@@ -49,6 +49,31 @@ This service acts as a **secure event inbox**:
 
 ---
 
+### Signature Format
+
+The `X-Signature` header **must** include the hashing algorithm prefix.
+
+Expected format:
+
+```
+X-Signature: sha256=<hex-encoded-hmac>
+```
+
+Where:
+
+- `sha256` is the hashing algorithm used to compute the HMAC
+- `<hex-encoded-hmac>` is the HMAC SHA-256 digest of the **raw request body**, encoded as a hexadecimal string
+
+Requests that:
+- omit the `X-Signature` header
+- omit the `sha256=` prefix
+- use a different hashing algorithm
+- provide a malformed or invalid signature
+
+will be rejected with **HTTP 401 Unauthorized**.
+
+---
+
 ## Environment Variables
 
 The following environment variables are required:
