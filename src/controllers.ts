@@ -10,6 +10,8 @@ const payloadSchema = z.object({
     provider_event_id : z.string().trim().min(1)
 }).strict()
 
+const orderIdSchema = z.string().trim().min(1)
+
 type WebhookPayload = z.infer<typeof payloadSchema>
 
 const createEvent = async (req : Request, res : Response) => {
@@ -44,10 +46,24 @@ const createEvent = async (req : Request, res : Response) => {
 
 const getEvent = async (req : Request, res : Response, next : NextFunction) => {
     try {
-        
+        const parsed = orderIdSchema.safeParse(req.query.order_id)
+
+        if (!parsed.success) {
+            return res.status(400).json({message : 'Invalid Order Id'})
+        }
+
+        const orderId = parsed.data
+
+        const events = await prisma.webhookEvent.findMany({
+            where : {orderId},
+            orderBy : {createdAt : 'desc'},
+            take : 50,
+        })
+
+        return res.status(200).json(events)
     }
     catch (err) {
-
+        next(err)
     }
 }
 

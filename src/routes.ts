@@ -4,6 +4,6 @@ import { getEvent, createEvent } from './controllers'
 const router = Router()
 
 router.post('/', createEvent)
-router.post('/:id', getEvent)
+router.get('/', getEvent)
 
 export default router
