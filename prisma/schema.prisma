@@ -2,6 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Prisma 6: URL provided via prisma.config.ts for migrations
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
