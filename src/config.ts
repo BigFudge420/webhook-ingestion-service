@@ -4,12 +4,16 @@ dotenv.config()
 
 interface Config {
     port : number,
-    node_env : string
+    nodeEnv : string,
+    webhookSecret : string 
 }
 
 const config : Config = {
     port : Number(process.env.PORT || 3000),
-    node_env : process.env.NODE_ENV || 'development'
+    nodeEnv : process.env.NODE_ENV || 'development',
+    webhookSecret : process.env.WEBHOOK_SECRET || (() => {
+        throw new Error("WEBHOOK_SECRET is not set")
+    })()
 }
 
 export default config

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express"
 import crypto from 'crypto'
+import config from "./config"
 
 const verifyHMAC = (req : Request, res : Response, next : NextFunction) => {
     const signatureHeader = req.header("X-Signature")
@@ -7,11 +8,8 @@ const verifyHMAC = (req : Request, res : Response, next : NextFunction) => {
         return res.status(401).json({message : 'Missing signature'})
     }
 
-    const secret = process.env.WEBHOOK_SECRET
-    if (!secret) {
-        throw new Error("WEBHOOK_SECRET not set")
-    }
-
+    const secret = config.webhookSecret
+    
     const receivedSignature = signatureHeader.replace('sha256=', '')
 
     const computedSignature = crypto.createHmac("sha256", secret).update((req as any).rawBody).digest("hex")
