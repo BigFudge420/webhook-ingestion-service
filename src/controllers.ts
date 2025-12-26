@@ -53,8 +53,11 @@ const createEvent = async (req : Request, res : Response) => {
 
 const getEvent = async (req : Request, res : Response, next : NextFunction) => {
     try {
-        // Supporting one order_id per GET request for now, can change it if needed in the future
-        const parsed = orderIdSchema.safeParse(req.query.order_id)
+        const rawOrderId = Array.isArray(req.query.order_id) 
+            ? req.query.order_id[0]
+            : req.query.order_id
+
+        const parsed = orderIdSchema.safeParse(rawOrderId)
 
         if (!parsed.success) {
             return res.status(400).json({message : 'Invalid Order Id'})
