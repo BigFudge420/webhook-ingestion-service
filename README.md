@@ -49,7 +49,7 @@ This service acts as a **secure event inbox**:
 
 ---
 
-### Signature Format
+## Signature Format
 
 The `X-Signature` header **must** include the hashing algorithm prefix.
 
@@ -166,3 +166,83 @@ npm start
 ```
 
 This runs the compiled JavaScript from dist/server.js.
+
+---
+
+## Testing the Service
+
+### Generate a valid HMAC signature
+
+Use OpenSSL to compute the HMAC for a test payload:
+```bash
+echo -n '{"order_id":"ord_123","status":"shipped","timestamp":"2025-01-15T10:30:00Z","provider_event_id":"evt_001"}' | \
+  openssl dgst -sha256 -hmac "your_shared_hmac_secret" | \
+  awk '{print "sha256="$2}'
+```
+
+Replace `your_shared_hmac_secret` with your actual `WEBHOOK_SECRET`.
+
+### Send a webhook event
+```bash
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-Signature: sha256=<computed_signature_from_above>" \
+  -d '{"order_id":"ord_123","status":"shipped","timestamp":"2025-01-15T10:30:00Z","provider_event_id":"evt_001"}'
+```
+
+**Expected response (first request):**
+```json
+{"message":"Event stored"}
+```
+
+**Expected response (duplicate `provider_event_id`):**
+```json
+{"message":"Duplicate Event"}
+```
+
+### Query stored events
+```bash
+curl "http://localhost:3000/webhook?order_id=ord_123"
+```
+
+**Expected response:**
+```json
+[
+  {
+    "id": 1,
+    "orderId": "ord_123",
+    "status": "shipped",
+    "providerTimeStamp": "2025-01-15T10:30:00.000Z",
+    "providerEventId": "evt_001",
+    "createdAt": "2025-12-26T12:34:56.789Z"
+  }
+]
+```
+
+### Test error cases
+
+**Missing signature:**
+```bash
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -d '{"order_id":"ord_123","status":"shipped","timestamp":"2025-01-15T10:30:00Z","provider_event_id":"evt_001"}'
+```
+Returns `401 Unauthorized` with `{"message":"Missing signature"}`
+
+**Invalid signature format (no prefix):**
+```bash
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-Signature: abc123" \
+  -d '{"order_id":"ord_123","status":"shipped","timestamp":"2025-01-15T10:30:00Z","provider_event_id":"evt_001"}'
+```
+Returns `401 Unauthorized` with `{"message":"Invalid signature format"}`
+
+**Malformed JSON:**
+```bash
+curl -X POST http://localhost:3000/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-Signature: sha256=abc123" \
+  -d '{invalid json}'
+```
+Returns `400 Bad Request` with `{"message":"Invalid JSON payload"}`
