@@ -7,12 +7,19 @@ const verifyHMAC = (req : Request, res : Response, next : NextFunction) => {
     if (!signatureHeader) {
         return res.status(401).json({message : 'Missing signature'})
     }
+    else if (!signatureHeader.startsWith('sha256=')) {
+        return res.status(401).json({message : 'Invalid signature format'})
+    }
 
     const secret = config.webhookSecret
     
-    const receivedSignature = signatureHeader.replace('sha256=', '')
+    const receivedSignature = signatureHeader.slice(7)
 
-    const computedSignature = crypto.createHmac("sha256", secret).update((req as any).rawBody).digest("hex")
+    if (!req.rawBody) {
+        return res.status(500).json({message : 'Raw body not available'})
+    }
+
+    const computedSignature = crypto.createHmac("sha256", secret).update(req.rawBody).digest("hex")
 
     const valid = 
         receivedSignature.length === computedSignature.length && 
