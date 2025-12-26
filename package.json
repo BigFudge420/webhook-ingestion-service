@@ -1,0 +1,28 @@
+{
+  "name": "webhook-ingestion-service",
+  "version": "1.0.0",
+  "description": "Webhook ingestion service with HMAC verification and deduplication",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.3",
+    "dotenv": "^17.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.7.4",
+    "prisma": "^6.19.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "express": "^5.2.1",
+    "zod": "^4.2.1"
+  }
+}
