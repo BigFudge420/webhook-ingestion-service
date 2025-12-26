@@ -1,18 +1,19 @@
-datasource db {
-  provider = "postgresql" 
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
-model WebhookEvent {
-  id Int @id @default(autoincrement())
-  orderId String
-  status String
-  providerTimeStamp DateTime
-  providerEventId String @unique
-  createdAt DateTime @default(now())
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-  @@index([orderId, createdAt(sort : Desc)])
+model WebhookEvent {
+  id                Int      @id @default(autoincrement())
+  orderId           String
+  status            String
+  providerTimeStamp DateTime
+  providerEventId   String   @unique
+  createdAt         DateTime @default(now())
+
+  @@index([orderId, createdAt(sort: Desc)])
 }
